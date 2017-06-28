@@ -48,3 +48,8 @@ class Pooling_layer():
     """
     def __init__(self):
         pass
+
+
+class Fully_connected_layer():
+    def __init__(self):
+        pass
