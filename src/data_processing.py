@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import random
 
 
@@ -30,10 +31,9 @@ def load_labels(filename='labels.csv',
     non_tl_labels = non_tl_labels.drop_duplicates('file')
 
     frames = [tl_labels, non_tl_labels]
-    labels = pd.concat(frames, ignore_index=True)
-    labels = labels.drop_duplicates('file', keep='first')
-    labels.reset_index(drop=True)
-    return labels
+    all_labels = pd.concat(frames, ignore_index=True)
+    all_labels = all_labels.drop_duplicates('file', keep='first')
+    return all_labels.reset_index(drop=True)
 
 
 def split_dataset(data, data_division={'train': 0.85, 'val': 0.15}):
@@ -56,4 +56,21 @@ def split_dataset(data, data_division={'train': 0.85, 'val': 0.15}):
     X_test = data_set.difference(full_train_set)
     X_train = full_train_set.difference(X_val)
 
+    # Converting to numpy arrays
+    X_train = np.array(list(X_train))
+    X_val = np.array(list(X_val))
+    X_test = np.array(list(X_test))
+
     return X_train, X_val, X_test
+
+
+def extract_labels(dataframe, filenames):
+    """
+        Given a pandas dataframe, extract the labels and return them as a
+        numpy array.
+    """
+    dataframe = dataframe.set_index('file')
+    labels = []
+    for name in filenames:
+        labels.append(dataframe.loc[name, 'label'])
+    return np.array(labels)
