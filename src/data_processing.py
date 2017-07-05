@@ -67,7 +67,7 @@ def split_dataset(data, data_division={'train': 0.85, 'val': 0.15}):
 
 def extract_labels(dataframe, filenames):
     """
-        Given a pandas dataframe, extract the labels and return them as a
+        Given a pandas dataframe, extract the labels and returns them as a
         numpy array.
     """
     dataframe = dataframe.set_index('file')
@@ -80,9 +80,15 @@ def extract_labels(dataframe, filenames):
 def images_generator(X, y, batch_size, total_images):
     """
         A generator for the images. Loads a 'batch_size' of images form disk
-        and returns it. Used for batch-training. As an example, if the batch
-        size is 64, the first call will return data[0:64], the second call
-        data[64:128], and so on.
+        and returns it. Used for batch-training.
+
+        As an example, if the batch size is 64:
+        -    The first call will return data[0:64]
+        -    The second call will return data[64:128]
+        -    and so on.
+
+        If the batch size is not a multiple of the dataset size, just the
+        remaining data will be loaded at the last call.
     """
     count = 0
     while count < total_images:
