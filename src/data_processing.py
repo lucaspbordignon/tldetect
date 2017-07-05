@@ -1,3 +1,4 @@
+from PIL import Image
 import pandas as pd
 import numpy as np
 import random
@@ -74,3 +75,32 @@ def extract_labels(dataframe, filenames):
     for name in filenames:
         labels.append(dataframe.loc[name, 'label'])
     return np.array(labels)
+
+
+def images_generator(X, y, batch_size, total_images):
+    """
+        A generator for the images. Loads a 'batch_size' of images form disk
+        and returns it. Used for batch-training. As an example, if the batch
+        size is 64, the first call will return data[0:64], the second call
+        data[64:128], and so on.
+    """
+    count = 0
+    while count < total_images:
+        begin_batch = count * batch_size
+        end_batch = begin_batch + batch_size
+
+        # Last chunk
+        if end_batch > total_images:
+            end_batch = total_images
+            count = total_images
+        images = []
+        labels = []
+
+        for i in range(begin_batch, end_batch):
+            images.append(np.array(Image.open('data/object-dataset/' + X[i])))
+            if (y[i] == 'trafficLight'):
+                labels.append(np.array([0, 1]))
+            else:
+                labels.append(np.array([1, 0]))
+        count += 1
+        yield (np.array(images), np.array(labels))
