@@ -77,7 +77,7 @@ def extract_labels(dataframe, filenames):
     return np.array(labels)
 
 
-def images_generator(X, y, batch_size, total_images):
+def images_generator(X, y, batch_size):
     """
         A generator for the images. Loads a 'batch_size' of images form disk
         and returns it. Used for batch-training.
@@ -91,6 +91,7 @@ def images_generator(X, y, batch_size, total_images):
         remaining data will be loaded at the last call.
     """
     count = 0
+    total_images = X.shape[0]
     while count < total_images:
         begin_batch = count * batch_size
         end_batch = begin_batch + batch_size
