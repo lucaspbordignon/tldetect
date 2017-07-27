@@ -92,14 +92,15 @@ def images_generator(X, y, batch_size):
     """
     count = 0
     total_images = X.shape[0]
-    while count < total_images:
+    while True:
         begin_batch = count * batch_size
         end_batch = begin_batch + batch_size
-
+        
         # Last chunk
         if end_batch > total_images:
-            end_batch = total_images
-            count = total_images
+            count = 0
+            continue
+
         images = []
         labels = []
 
