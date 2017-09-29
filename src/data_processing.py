@@ -5,18 +5,11 @@ import random
 
 
 DATA_DIR = 'data/object-dataset/'
+HEADER = ['file', 'x_min', 'y_min', 'x_max', 'y_max',
+          'occluded', 'label', 'properties']
 
 
-def load_labels(filename='labels.csv',
-                header=[
-                    'file',
-                    'x_min',
-                    'y_min',
-                    'x_max',
-                    'y_max',
-                    'occluded',
-                    'label',
-                    'properties']):
+def load_labels(filename='labels.csv', header=HEADER):
     """
         Loads a file and its labels. Extracts just the relevant data for the
         model, i.e. files with and without traffic lights.
@@ -77,9 +70,31 @@ def extract_labels(dataframe, filenames):
     return np.array(labels)
 
 
+def extract_tl_labels(dataframe, filenames):
+    """
+        Given a pandas dataframe, extract the labels and returns them as a
+        numpy array. Returns 7 labels:
+            - Red
+            - RedLeft
+            - Green
+            - GreenLeft
+            - Yellow
+            - YellowLeft
+            - NoTrafficLight
+    """
+    dataframe = dataframe.set_index('file')
+    labels = []
+    for name in filenames:
+        if (dataframe.loc[name, 'label'] == 'trafficLight'):
+            labels.append(dataframe.loc[name, 'properties'])
+        else:
+            labels.append('NoTrafficLight')
+    return np.array(labels)
+
+
 def images_generator(X, y, batch_size):
     """
-        A generator for the images. Loads a 'batch_size' of images form disk
+        A generator for the images. Loads a 'batch_size' of images from disk
         and returns it. Used for batch-training.
 
         As an example, if the batch size is 64:
@@ -110,5 +125,53 @@ def images_generator(X, y, batch_size):
                 labels.append(np.array([0, 1]))
             else:
                 labels.append(np.array([1, 0]))
+        count += 1
+        yield (np.array(images), np.array(labels))
+
+
+def images_tl_generator(X, y, batch_size):
+    """
+        A generator for the images. Loads a 'batch_size' of images from disk
+        and returns it. Used for batch-training.
+
+        As an example, if the batch size is 64:
+        -    The first call will return data[0:64]
+        -    The second call will return data[64:128]
+        -    and so on.
+
+        If the batch size is not a multiple of the dataset size, just the
+        remaining data will be loaded at the last call. Returns the labels for
+        the light colors classification
+    """
+    count = 0
+    total_images = X.shape[0]
+    while True:
+        begin_batch = count * batch_size
+        end_batch = begin_batch + batch_size
+        
+        # Last chunk
+        if end_batch > total_images:
+            count = 0
+            continue
+
+        images = []
+        labels = []
+
+        for i in range(begin_batch, end_batch):
+            images.append(np.array(Image.open('data/object-dataset/' + X[i])))
+            if (y[i] == 'Red'):
+                labels.append(np.array([0, 1, 0, 0, 0, 0, 0]))
+            elif (y[i] == 'RedLeft'):
+                labels.append(np.array([0, 0, 1, 0, 0, 0, 0]))
+            elif (y[i] == 'Green'):
+                labels.append(np.array([0, 0, 0, 1, 0, 0, 0]))
+            elif (y[i] == 'GreenLeft'):
+                labels.append(np.array([0, 0, 0, 0, 1, 0, 0]))
+            elif (y[i] == 'Yellow'):
+                labels.append(np.array([0, 0, 0, 0, 0, 1, 0]))
+            elif (y[i] == 'YellowLeft'):
+                labels.append(np.array([0, 0, 0, 0, 0, 0, 1]))
+            else:
+                labels.append(np.array([1, 0, 0, 0, 0, 0, 0]))
         count += 1
         yield (np.array(images), np.array(labels))
