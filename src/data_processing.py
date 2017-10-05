@@ -175,3 +175,21 @@ def images_tl_generator(X, y, batch_size):
                 labels.append(np.array([1, 0, 0, 0, 0, 0, 0]))
         count += 1
         yield (np.array(images), np.array(labels))
+
+
+def show_label(results):
+    """
+        Given an array of results, prints the actual label of the correspondent
+        class.
+    """
+    def detect_label(index):
+        return "Label: " + {
+                0 : "No Traffic Light",
+                1 : "Red Traffic Light",
+                2 : "Red to Left Traffic Light",
+                3 : "Green Traffic Light",
+                4 : "Green to Left Traffic Light",
+                5 : "Yellow Traffic Light",
+                6 : "Yellow to Left Traffic Light",
+                }[index]
+    print(detect_label(list(results).index(1)))
